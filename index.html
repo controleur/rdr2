@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <title>Red Dead Redemption 2 Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.cdnfonts.com/css/chinese-rocks" rel="stylesheet">
+    
+    
+</head>
+<body>
+    <div id="logo-container">
+        <img src="assets/rdr2.svg" alt="Logo" id="logo">
+    </div>
+    <button id="add-marker-btn" class="btn btn-primary">Click here to add a marker</button>
+    <div id="legend" class="card">
+        <h5 class="card-header">Legend</h5>
+        <ul id="marker-list" class="list-group list-group-flush"></ul>
+    </div>
+    <div id="map"></div>
+
+    <div class="modal fade" id="markerModal" tabindex="-1" aria-labelledby="markerModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="markerModalLabel">Marker creation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="markerForm">
+                        <div class="mb-3">
+                            <label for="markerName" class="form-label">Marker name</label>
+                            <input type="text" class="form-control" id="markerName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="markerColor" class="form-label">Marker color</label>
+                            <div class="color-palette" id="colorPalette">
+                            </div>
+                            <input type="color" class="form-control mt-2" id="markerColor" value="#ff0000">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Marker icon</label>
+                            <div class="icon-grid" id="iconGrid">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="markerComment" class="form-label">Details</label>
+                            <textarea class="form-control" id="markerComment" rows="2" placeholder="Add a comment"></textarea>
+                        </div>
+                        <input type="hidden" id="markerIcon" value="default">
+                        <button type="submit" class="btn btn-primary">Add</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="credits-container" class="leaflet-control leaflet-control-attribution">
+        <a href="https://www.rockstargames.com/reddeadredemption2" target="_blank">
+            Original map by Rockstar Games <img src="assets/rockstar.svg" alt="Rockstar Logo" class="credit-logo">
+        </a> |
+        <a href="https://www.nexusmods.com/reddeadredemption2/mods/676" target="_blank">
+            High quality base map by Jotrius <img src="assets/nexus.svg" alt="NexusMods Logo" class="credit-logo">
+        </a> |
+        <a href="https://github.com/controleur/RDR2/" target="_blank">
+            Interactive map by Controleur <img src="assets/github.svg" alt="GitHub Logo" class="credit-logo">
+        </a>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>     
+        const map = L.map('map', {
+            crs: L.CRS.Simple,
+            minZoom: 0,
+            maxZoom: 5,
+            zoomSnap: 0.25
+        });
+        const centerPoint = map.unproject([1024/2 , 768/2], 0);
+        const bounds = new L.LatLngBounds(
+            map.unproject([0, 768], 0),
+            map.unproject([1024, 0], 0)
+        );
+        L.tileLayer('map/{z}/{x}/{y}.jpg', {
+            tileSize: 256,
+            noWrap: true,
+            tms: true,
+            bounds: bounds
+        }).addTo(map);
+        map.setView(centerPoint, 0.5);
+        map.setMaxBounds(bounds);
+        map.zoomControl.setPosition('topright');
+        const markerList = document.getElementById('marker-list');
+        let addMarkerMode = false; 
+        const addMarkerBtn = document.getElementById('add-marker-btn');
+        addMarkerBtn.addEventListener('click', () => {
+            addMarkerMode = !addMarkerMode; 
+            addMarkerBtn.textContent = addMarkerMode ? 'Marker creation mode' : 'Exploration Mode';
+        });
+
+        let markerLatLng = null;
+
+        map.on('click', function (e) {
+            if (!addMarkerMode) return;
+            markerLatLng = e.latlng;
+            const markerModal = new bootstrap.Modal(document.getElementById('markerModal'));
+            markerModal.show();
+        });
+
+        let markersData = []; 
+        function loadMarkers() {
+            const storedMarkers = localStorage.getItem('markers');
+            if (storedMarkers) {
+                markersData = JSON.parse(storedMarkers); 
+                markersData.forEach(markerData => {
+                    const customIcon = L.divIcon({
+                        className: 'custom-marker',
+                        html: `<div style="background-color: ${markerData.color}; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                    <i class="bi bi-${markerData.icon}" style="font-size: 16px; color: white;"></i>
+                               </div>`,
+                        iconSize: [30, 30],
+                        iconAnchor: [15, 15]
+                    });
+
+                    const marker = L.marker([markerData.lat, markerData.lng], { icon: customIcon }).addTo(map);
+                    marker.bindPopup(`<strong>${markerData.name}</strong><br>${markerData.comment || ''}<br>
+                        <button class="btn btn-danger btn-sm mt-2" onclick="deleteMarker(${markerData.lat}, ${markerData.lng})"><i class="bi bi-trash"></i></button>
+                        <button class="btn btn-secondary btn-sm mt-2" onclick="editMarker(${markerData.lat}, ${markerData.lng})"><i class="bi bi-pencil"></i></button>`);
+
+                    const listItem = document.createElement('li');
+                    listItem.innerHTML = `<i class="bi bi-${markerData.icon}" style="color: ${markerData.color}; margin-right: 5px;"></i><strong>${markerData.name}</strong>`;
+                    listItem.dataset.lat = markerData.lat;
+                    listItem.dataset.lng = markerData.lng;
+                    listItem.dataset.color = markerData.color;
+                    listItem.dataset.icon = markerData.icon;
+                    listItem.dataset.comment = markerData.comment || '';
+                    listItem.addEventListener('click', () => {
+                        map.setView([markerData.lat, markerData.lng], map.getZoom());
+                        marker.openPopup(); 
+                    });
+
+                    markerList.appendChild(listItem);
+                });
+            }
+        }
+
+        function saveMarkers() {
+            markersData = [];
+            document.querySelectorAll('#marker-list li').forEach(item => {
+                markersData.push({
+                    name: item.textContent,
+                    lat: parseFloat(item.dataset.lat),
+                    lng: parseFloat(item.dataset.lng),
+                    color: item.dataset.color,
+                    icon: item.dataset.icon,
+                    comment: item.dataset.comment
+                });
+            });
+
+            localStorage.setItem('markers', JSON.stringify(markersData));
+            console.log('Marker saved in Local Storage:', markersData);
+        }
+
+        document.getElementById('markerForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const markerName = document.getElementById('markerName').value;
+            const markerColor = document.getElementById('markerColor').value;
+            const markerIcon = document.getElementById('markerIcon').value;
+            const markerComment = document.getElementById('markerComment').value;
+
+            if (!markerLatLng) return;
+
+            deleteMarker(markerLatLng.lat, markerLatLng.lng, false);
+
+            const customIcon = L.divIcon({
+                className: 'custom-marker',
+                html: `<div style="background-color: ${markerColor}; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                            <i class="bi bi-${markerIcon}" style="font-size: 16px; color: white;"></i>
+                       </div>`,
+                iconSize: [30, 30],
+                iconAnchor: [15, 15]
+            });
+
+            const marker = L.marker(markerLatLng, { icon: customIcon }).addTo(map);
+            marker.bindPopup(`<strong>${markerName}</strong><br>${markerComment}<br>
+                <button class="btn btn-danger btn-sm mt-2" onclick="deleteMarker(${markerLatLng.lat}, ${markerLatLng.lng})"><i class="bi bi-trash"></i></button>
+                <button class="btn btn-secondary btn-sm mt-2" onclick="editMarker(${markerLatLng.lat}, ${markerLatLng.lng})"><i class="bi bi-pencil"></i></button>`).openPopup();
+
+            const listItem = document.createElement('li');
+            listItem.innerHTML = `<i class="bi bi-${markerIcon}" style="color: ${markerColor}; margin-right: 5px;"></i><strong>${markerName}</strong>`;
+            listItem.dataset.lat = markerLatLng.lat;
+            listItem.dataset.lng = markerLatLng.lng;
+            listItem.dataset.color = markerColor;
+            listItem.dataset.icon = markerIcon;
+            listItem.dataset.comment = markerComment;
+
+            listItem.addEventListener('click', () => {
+                map.setView([markerLatLng.lat, markerLatLng.lng], map.getZoom());
+                marker.openPopup(); 
+            });
+
+            markerList.appendChild(listItem);
+
+            saveMarkers();
+
+            document.getElementById('markerForm').reset();
+            markerLatLng = null;
+            const markerModal = bootstrap.Modal.getInstance(document.getElementById('markerModal'));
+            markerModal.hide();
+        });
+
+        function deleteMarker(lat, lng, updateStorage = true) {
+            const items = document.querySelectorAll(`#marker-list li`);
+            items.forEach(item => {
+                if (item.dataset.lat == lat && item.dataset.lng == lng) {
+                    item.remove();
+                }
+            });
+
+            map.eachLayer(layer => {
+                if (layer instanceof L.Marker && layer.getLatLng().lat === lat && layer.getLatLng().lng === lng) {
+                    map.removeLayer(layer);
+                }
+            });
+
+            if (updateStorage) {
+                saveMarkers();
+            }
+        }
+
+        function editMarker(lat, lng) {
+            const items = document.querySelectorAll(`#marker-list li`);
+            items.forEach(item => {
+                if (item.dataset.lat == lat && item.dataset.lng == lng) {
+                    document.getElementById('markerName').value = item.textContent.trim();
+                    document.getElementById('markerColor').value = item.dataset.color;
+                    document.getElementById('markerIcon').value = item.dataset.icon;
+                    document.getElementById('markerComment').value = item.dataset.comment;
+                    markerLatLng = { lat: parseFloat(item.dataset.lat), lng: parseFloat(item.dataset.lng) };
+                    const markerModal = new bootstrap.Modal(document.getElementById('markerModal'));
+                    markerModal.show();
+                }
+            });
+        }
+
+        loadMarkers();
+        const availableIcons = [
+            "1-circle", "2-circle", "3-circle", "4-circle", "5-circle", "6-circle", "7-circle", "8-circle", "9-circle", "flag",
+            "emoji-angry", "emoji-dizzy", "emoji-frown", "emoji-smile", "key", "lock", "house-door", "chat", "hourglass-split", "backpack2",
+            "ban", "envelope-exclamation", "exclamation-lg", "check", "question", "search", "cursor", "compass", "shield", "eye"
+        ];
+        const iconGrid = document.getElementById("iconGrid");
+        availableIcons.forEach(icon => {
+            const button = document.createElement("button");
+            button.innerHTML = `<i class="bi bi-${icon}"></i>`;
+            button.dataset.icon = icon;
+            button.type = "button";
+            button.addEventListener("click", function () {
+                document.querySelectorAll(".icon-grid button").forEach(btn => btn.classList.remove("selected"));
+                button.classList.add("selected");
+                document.getElementById("markerIcon").value = icon;
+            });
+            iconGrid.appendChild(button);
+        });
+
+        const baseColors = [
+            "#ff0000", "#ffa500", "#ffff00", "#008000", "#0000ff",
+            "#4b0082", "#ee82ee", "#a52a2a", "#808080", "#000000"
+        ];
+
+        const colorPalette = document.getElementById("colorPalette");
+        baseColors.forEach(color => {
+            const colorButton = document.createElement("button");
+            colorButton.className = "color-button";
+            colorButton.style.backgroundColor = color;
+            colorButton.dataset.color = color;
+            colorButton.type = "button"; 
+            colorButton.addEventListener("click", function () {
+                document.querySelectorAll(".color-button").forEach(btn => btn.classList.remove("selected"));
+                colorButton.classList.add("selected");
+                document.getElementById("markerColor").value = color;
+            });
+            colorPalette.appendChild(colorButton);
+        });
+        </script>
+    
+               
+</body>
+</html>

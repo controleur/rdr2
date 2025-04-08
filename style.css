@@ -1,0 +1,355 @@
+:root {
+    --bs-primary: #8b0000;
+    --bs-primary-hover: #a30000;
+    --bs-primary-border: #5a0000;
+    --bs-secondary: #3a3a3a;
+    --bs-secondary-hover: #4a4a4a;
+    --bs-secondary-border: #2a2a2a;
+    --bs-danger: #5a0000;
+    --bs-danger-hover: #6a0000;
+    --bs-danger-border: #3a0000;
+    --bs-modal-bg: #8b0000;
+    --bs-modal-header-bg: #5a0000;
+    --bs-modal-header-border-color: #3a0000;
+    --bs-modal-footer-bg: #5a0000;
+    --bs-modal-footer-border-color: #3a0000;
+    --bs-text-color: white;
+    --bs-border-color: #5a0000;
+    --bs-box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    --bs-text-shadow: 1px 1px 2px black;
+}
+
+*{
+    font-family: 'Chinese Rocks Rg', sans-serif;
+}
+body {
+  margin: 0;
+  background: #dec29b;
+  font-family: 'Chinese Rocks Rg', sans-serif;
+}
+#map {
+  height: 100vh;
+  width: 100%;
+  background: #dec29b;
+}
+#add-marker-btn {
+    position: absolute;
+    font-family: 'Chinese Rocks Rg', sans-serif;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    background: var(--bs-primary);
+    color: var(--bs-text-color);
+    border: 2px solid var(--bs-primary-border);
+    font-size: 16px;
+    font-weight: bold;
+    text-shadow: var(--bs-text-shadow);
+    box-shadow: var(--bs-box-shadow);
+}
+
+#add-marker-btn:hover {
+    background: var(--bs-primary-hover);
+    border-color: var(--bs-primary-border);
+}
+
+#legend {
+    position: absolute;
+    bottom: 40px;
+    left: 10px;
+    background: var(--bs-primary);
+    color: var(--bs-text-color);
+    border: 2px solid var(--bs-primary-border);
+    border-radius: 5px;
+    max-height: 80vh;
+    max-width: 25vw;
+    overflow-y: auto;
+    z-index: 1000;
+    box-shadow: var(--bs-box-shadow);
+}
+
+#legend h5 {
+    font-size: 18px;
+    font-weight: bold;
+    text-shadow: var(--bs-text-shadow);
+    margin: 0;
+    padding: 5px;
+    background: var(--bs-modal-header-bg);
+    border-bottom: 2px solid var(--bs-modal-header-border-color);
+}
+
+#legend ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+#legend ul li {
+    padding: 5px;
+    border-bottom: 1px solid var(--bs-primary-border);
+    cursor: pointer; 
+}
+
+#legend ul li:last-child {
+    border-bottom: none;
+}
+
+#legend ul li:hover {
+    background: var(--bs-primary-hover);
+    color: var(--bs-text-color);
+}
+
+.icon-grid {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    gap: 10px;
+}
+
+.icon-grid button {
+    background: var(--bs-primary);
+    border: 2px solid var(--bs-primary-border);
+    color: var(--bs-text-color);
+    cursor: pointer;
+    padding: 5px;
+    text-align: center;
+    border-radius: 5px;
+    box-shadow: var(--bs-box-shadow);
+}
+
+.icon-grid button i {
+    font-size: 24px;
+}
+
+.icon-grid button:hover {
+    background: var(--bs-primary-hover);
+    border-color: var(--bs-primary-border);
+}
+
+.icon-grid button.selected {
+    border: 2px solid var(--bs-text-color);
+    background: var(--bs-primary-hover);
+}
+
+#logo-container {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 1000;
+}
+
+#logo {
+    height: 50px;
+    width: auto;
+}
+
+.modal-content {
+    background: var(--bs-modal-bg);
+    color: var(--bs-text-color);
+    border: 2px solid var(--bs-primary-border);
+    border-radius: 5px;
+    box-shadow: var(--bs-box-shadow);
+}
+
+.modal-header {
+    background: var(--bs-modal-header-bg);
+    border-radius: 0;
+    border-bottom: 2px solid var(--bs-modal-header-border-color);
+}
+
+.modal-title {
+    font-size: 18px;
+    font-weight: bold;
+    text-shadow: var(--bs-text-shadow);
+}
+
+.modal-body {
+    background: var(--bs-modal-bg);
+}
+
+.modal-footer {
+    background: var(--bs-modal-footer-bg);
+    border-top: 2px solid var(--bs-modal-footer-border-color);
+}
+#markerForm{
+    color: var(--bs-secondary);
+}
+
+button.btn-primary {
+    background: var(--bs-primary);
+    border: 2px solid var(--bs-primary-border);
+    color: var(--bs-text-color);
+    font-weight: bold;
+    text-shadow: var(--bs-text-shadow);
+}
+
+button.btn-primary:hover {
+    background: var(--bs-primary-hover);
+    border-color: var(--bs-primary-border);
+}
+
+button.btn-primary:active {
+    background: var(--bs-primary-hover);
+    border-color: var(--bs-primary-border);
+    box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.3);
+}
+
+button.btn-danger {
+    background: var(--bs-danger);
+    border: 2px solid var(--bs-danger-border);
+    color: var(--bs-text-color);
+    font-weight: bold;
+    text-shadow: var(--bs-text-shadow);
+}
+
+button.btn-danger:hover {
+    background: var(--bs-danger-hover);
+    border-color: var(--bs-danger-border);
+}
+
+button.btn-danger:active {
+    background: var(--bs-danger-hover);
+    border-color: var(--bs-danger-border);
+    box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.3);
+}
+
+button.btn-secondary {
+    background: var(--bs-secondary);
+    border: 2px solid var(--bs-secondary-border);
+    color: var(--bs-text-color);
+    font-weight: bold;
+    text-shadow: var(--bs-text-shadow);
+}
+
+button.btn-secondary:hover {
+    background: var(--bs-secondary-hover);
+    border-color: var(--bs-secondary-border);
+}
+
+button.btn-secondary:active {
+    background: var(--bs-secondary-hover);
+    border-color: var(--bs-secondary-border);
+    box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.3);
+}
+
+.icon-grid button:active {
+    background: var(--bs-primary-hover);
+    box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.3);
+}
+
+.leaflet-control-zoom {
+    background: var(--bs-primary);
+    border: 2px solid var(--bs-primary-border);
+    border-radius: 5px;
+    box-shadow: var(--bs-box-shadow);
+    overflow: hidden;
+}
+
+.leaflet-control-zoom a {
+    background: var(--bs-primary);
+    color: var(--bs-text-color);
+    font-weight: bold;
+    text-shadow: var(--bs-text-shadow);
+    border-bottom: 1px solid var(--bs-primary-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 40px;
+    font-size: 18px;
+}
+
+.leaflet-control-zoom a:last-child {
+    border-bottom: none;
+}
+
+.leaflet-control-zoom a:hover {
+    background: var(--bs-primary-hover);
+    color: var(--bs-text-color);
+}
+
+.leaflet-control-zoom a:active {
+    background: var(--bs-primary-hover);
+    border-color: var(--bs-primary-border);
+    box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.3);
+}
+
+.leaflet-bar a.leaflet-disabled{
+    background: var(--bs-primary);
+}
+
+
+.btn-check:checked+.btn, 
+.btn.active, 
+.btn.show, 
+.btn:first-child:active, 
+:not(.btn-check)+.btn:active {
+    color: var(--bs-text-color) !important;
+    background-color: var(--bs-primary-hover) !important;
+    border-color: var(--bs-primary-border) !important;
+    box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.3) !important;
+}
+
+.color-palette {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+}
+
+.color-button {
+    width: 30px;
+    height: 30px;
+    border: 2px solid var(--bs-primary-border);
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: var(--bs-box-shadow);
+    transition: transform 0.2s ease;
+}
+
+.color-button:hover {
+    transform: scale(1.1);
+    border-color: var(--bs-primary-hover);
+}
+
+.color-button.selected {
+    border: 2px solid var(--bs-text-color);
+    transform: scale(1.2);
+}
+
+
+.modal-header .btn-close {
+    filter: invert(1); 
+    opacity: 1;
+}
+
+.modal-header .btn-close:hover {
+    filter: invert(1) brightness(1.2); 
+}
+
+#credits-container {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    background: rgba(255, 255, 255, 0.8);
+    padding: 5px 10px;
+    font-size: 12px;
+    color: #333;
+    z-index: 1000;
+    border-top-right-radius: 5px;
+    box-shadow: var(--bs-box-shadow);
+}
+
+#credits-container a {
+    color: var(--bs-primary-hover);
+    text-decoration: none;
+    font-weight: bold;
+}
+
+#credits-container a:hover {
+    text-decoration: underline;
+}
+
+.credit-logo {
+    height: 14px;
+    width: auto;
+    vertical-align: middle;
+    margin-left: 5px;
+}
